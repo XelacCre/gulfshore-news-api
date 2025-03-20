@@ -7,9 +7,7 @@ app = FastAPI()
 URL = "https://www.gulfshorebusiness.com/category/commercial-real-estate/"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                  "AppleWebKit/537.36 (KHTML, like Gecko)"
-                  "Chrome/123.0.0.0 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 }
 
 def scrape_news():
@@ -21,7 +19,6 @@ def scrape_news():
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Extract headlines & URLs
     articles = soup.select('article.jeg_post div.jeg_postblock_content h3.jeg_post_title a')
     if not articles:
         return {"error": "No articles found. Check your selectors."}
@@ -37,3 +34,4 @@ def scrape_news():
 @app.get("/news")
 def get_news():
     return scrape_news()
+
