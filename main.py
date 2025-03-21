@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 app = FastAPI()
@@ -37,7 +37,7 @@ def fetch_article_date(article_url):
         return "Date fetch failed"
 
 # Main scraping function
-def scrape_news():
+def scrape_news(days: int = 0):
     try:
         response = requests.get(URL, headers=HEADERS, timeout=10)
         response.raise_for_status()
@@ -69,16 +69,30 @@ def scrape_news():
                 "date": pub_date
             }
 
+            # Filter by number of days if specified
+            if days > 0:
+                try:
+                    pub_dt = datetime.strptime(pub_date, "%B %d, %Y")
+                    if pub_dt < datetime.utcnow() - timedelta(days=days):
+                        continue
+                except Exception as e:
+                    print(f"Date parse failed for '{pub_date}': {e}")
+                    # Still include if date not parsable (optional: skip instead)
+
+            print(f"[{pub_date}] {headline}")
+            print(f" → {link}\n")
+
             news_list.append(news_item)
 
     return {"news": news_list, "fetched_at": datetime.utcnow().isoformat()}
 
+# Modified route with optional query param
 @app.get("/news")
-def get_news():
-    return scrape_news()
+def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
+    return scrape_news(days)
 
 # Run manually in script for testing outside API
 if __name__ == "__main__":
     print("Scraping Gulfshore Business - Commercial Real Estate News...\n")
-    result = scrape_news()
+    result = scrape_news(days=7)
     print(result)
