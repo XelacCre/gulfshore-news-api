@@ -3,16 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-import re 
+import re
 
 app = FastAPI()
 
 URL = "https://www.gulfshorebusiness.com/category/commercial-real-estate/"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                  "AppleWebKit/537.36 (KHTML, like Gecko)"
-                  "Chrome/123.0.0.0 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 }
 
 # Fetch individual article date
@@ -36,8 +34,7 @@ def fetch_article_date(article_url):
         return "Date not found"
 
     except requests.RequestException:
-        return "Date fetch failed"cd 
-
+        return "Date fetch failed"
 
 # Main scraping function
 def scrape_news():
@@ -72,10 +69,6 @@ def scrape_news():
                 "date": pub_date
             }
 
-            # Print to terminal
-            #print(f"[{pub_date}] {headline}")
-            #print(f" → {link}\n")
-
             news_list.append(news_item)
 
     return {"news": news_list, "fetched_at": datetime.utcnow().isoformat()}
@@ -88,3 +81,4 @@ def get_news():
 if __name__ == "__main__":
     print("Scraping Gulfshore Business - Commercial Real Estate News...\n")
     result = scrape_news()
+    print(result)
