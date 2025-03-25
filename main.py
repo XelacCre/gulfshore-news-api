@@ -7,7 +7,7 @@ import re
 
 app = FastAPI()
 
-# 🧩 Config: Multi-source support
+#  Config: Multi-source support
 NEWS_SOURCES = [
     {
         "name": "Gulfshore Business – CRE",
@@ -18,19 +18,29 @@ NEWS_SOURCES = [
         "name": "Gulfshore Business – Construction & Development",
         "url": "https://www.gulfshorebusiness.com/category/construction-development/",
         "selector": "article.jeg_post div.jeg_postblock_content h3.jeg_post_title a"
+    },
+    {
+        "name": "Gulfshore Business – Residential Real Estate",
+        "url": "https://www.gulfshorebusiness.com/category/residential-real-estate/",
+        "selector": "article.jeg_post div.jeg_postblock_content h3.jeg_post_title a"
+    },
+    {
+        "name": "Gulfshore Business – Home",
+        "url": "https://www.gulfshorebusiness.com/",
+        "selector": "article.elementor-post h3 a"
     }
 ]
 
-# 🧠 HTTP request headers
+#  HTTP request headers
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 }
 
-# 📅 Date format regex
+#  Date format regex
 DATE_PATTERN = re.compile(r"^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$")
 
 
-# 🔍 Extract date from individual article page
+#  Extract date from individual article page
 def fetch_article_date(article_url: str) -> str:
     try:
         resp = requests.get(article_url, headers=HEADERS, timeout=10)
@@ -47,7 +57,7 @@ def fetch_article_date(article_url: str) -> str:
         return "Date fetch failed"
 
 
-# ⏱️ Check if date is within the last N days
+#  Check if date is within the last N days
 def is_within_days(date_str: str, days: int) -> bool:
     try:
         pub_dt = datetime.strptime(date_str, "%B %d, %Y")
@@ -57,7 +67,7 @@ def is_within_days(date_str: str, days: int) -> bool:
         return False
 
 
-# 🔁 Main scraping logic
+#  Main scraping logic
 def scrape_news(days: int = 0):
     news_list = []
 
@@ -84,17 +94,27 @@ def scrape_news(days: int = 0):
                 article = futures[future]
                 headline = article.get_text(strip=True)
                 link = article['href']
+
+                # ✅ NEW: Detect sponsored content
+                is_sponsored = "/sponsored_content/" in link
+
                 pub_date = future.result()
+
+                # ✅ NEW: Label sponsored articles with fallback if no date
+                if is_sponsored and (pub_date == "Date not found" or pub_date == "Date fetch failed"):
+                    pub_date = "Sponsored Content"
 
                  #Filter by days if provided
                 if days > 0 and not is_within_days(pub_date, days):
                     continue
 
+                # ✅ NEW: Include sponsored flag in each article
                 news_item = {
                     "source": source["name"],
                     "title": headline,
                     "url": link,
-                    "date": pub_date
+                    "date": pub_date,
+                    "sponsored": is_sponsored
                 }
 
                 print(f"[{pub_date}] {headline}")
@@ -109,13 +129,13 @@ def scrape_news(days: int = 0):
     }
 
 
-# 🧠 FastAPI route with optional ?days=N query
+#  FastAPI route with optional ?days=N query
 @app.get("/news")
 def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
     return scrape_news(days)
 
 
-# 🧪 Local testing support
+#  Local testing support
 if __name__ == "__main__":
     print("Scraping Gulfshore Business (All Sources)...\n")
     result = scrape_news(days=0)
