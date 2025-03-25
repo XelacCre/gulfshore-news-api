@@ -2,97 +2,121 @@ from fastapi import FastAPI, Query
 import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 import re
 
 app = FastAPI()
 
-URL = "https://www.gulfshorebusiness.com/category/commercial-real-estate/"
+# 🧩 Config: Multi-source support
+NEWS_SOURCES = [
+    {
+        "name": "Gulfshore Business – CRE",
+        "url": "https://www.gulfshorebusiness.com/category/commercial-real-estate/",
+        "selector": "article.jeg_post div.jeg_postblock_content h3.jeg_post_title a"
+    },
+    {
+        "name": "Gulfshore Business – Construction & Development",
+        "url": "https://www.gulfshorebusiness.com/category/construction-development/",
+        "selector": "article.jeg_post div.jeg_postblock_content h3.jeg_post_title a"
+    }
+]
 
+# 🧠 HTTP request headers
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 }
 
-# Fetch individual article date
-def fetch_article_date(article_url):
+# 📅 Date format regex
+DATE_PATTERN = re.compile(r"^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$")
+
+
+# 🔍 Extract date from individual article page
+def fetch_article_date(article_url: str) -> str:
     try:
         resp = requests.get(article_url, headers=HEADERS, timeout=10)
         resp.raise_for_status()
-        article_soup = BeautifulSoup(resp.text, 'html.parser')
+        soup = BeautifulSoup(resp.text, 'html.parser')
 
-        # Check all common span locations where dates could appear
-        candidates = article_soup.select("span.elementor-icon-list-text, span.jeg_meta_date")
-
-        # Regex for date pattern like "March 21, 2025"
-        date_pattern = re.compile(r"^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$")
-
+        candidates = soup.select("span.elementor-icon-list-text, span.jeg_meta_date")
         for tag in candidates:
             text = tag.get_text(strip=True)
-            if date_pattern.match(text):
+            if DATE_PATTERN.match(text):
                 return text
-
         return "Date not found"
-
     except requests.RequestException:
         return "Date fetch failed"
 
-# Main scraping function
-def scrape_news(days: int = 0):
+
+# ⏱️ Check if date is within the last N days
+def is_within_days(date_str: str, days: int) -> bool:
     try:
-        response = requests.get(URL, headers=HEADERS, timeout=10)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        print(f"Error fetching the news listing page: {str(e)}")
-        return {"error": f"Failed to fetch news: {str(e)}"}
+        pub_dt = datetime.strptime(date_str, "%B %d, %Y")
+        return pub_dt >= datetime.utcnow() - timedelta(days=days)
+    except Exception as e:
+        print(f"⚠️ Date parse failed for '{date_str}': {e}")
+        return False
 
-    soup = BeautifulSoup(response.text, 'html.parser')
-    articles = soup.select('article.jeg_post div.jeg_postblock_content h3.jeg_post_title a')
 
-    if not articles:
-        print("No articles found. Check your selectors.")
-        return {"error": "No articles found."}
-
+# 🔁 Main scraping logic
+def scrape_news(days: int = 0):
     news_list = []
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {executor.submit(fetch_article_date, article['href']): article for article in articles}
+    for source in NEWS_SOURCES:
+        print(f"\n🔍 Scraping: {source['name']}")
+        try:
+            resp = requests.get(source["url"], headers=HEADERS, timeout=10)
+            resp.raise_for_status()
+        except requests.RequestException as e:
+            print(f"⚠️ Error fetching {source['name']}: {str(e)}")
+            continue
 
-        for future in futures:
-            article = futures[future]
-            headline = article.get_text(strip=True)
-            link = article['href']
-            pub_date = future.result()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        articles = soup.select(source["selector"])
 
-            news_item = {
-                "title": headline,
-                "url": link,
-                "date": pub_date
-            }
+        if not articles:
+            print(f"⚠️ No articles found for {source['name']}")
+            continue
 
-            # Filter by number of days if specified
-            if days > 0:
-                try:
-                    pub_dt = datetime.strptime(pub_date, "%B %d, %Y")
-                    if pub_dt < datetime.utcnow() - timedelta(days=days):
-                        continue
-                except Exception as e:
-                    print(f"Date parse failed for '{pub_date}': {e}")
-                    # Still include if date not parsable (optional: skip instead)
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(fetch_article_date, a['href']): a for a in articles}
 
-            print(f"[{pub_date}] {headline}")
-            print(f" → {link}\n")
+            for future in futures:
+                article = futures[future]
+                headline = article.get_text(strip=True)
+                link = article['href']
+                pub_date = future.result()
 
-            news_list.append(news_item)
+                 #Filter by days if provided
+                if days > 0 and not is_within_days(pub_date, days):
+                    continue
 
-    return {"news": news_list, "fetched_at": datetime.utcnow().isoformat()}
+                news_item = {
+                    "source": source["name"],
+                    "title": headline,
+                    "url": link,
+                    "date": pub_date
+                }
 
-# Modified route with optional query param
+                print(f"[{pub_date}] {headline}")
+                print(f" → {link}\n")
+
+                news_list.append(news_item)
+
+    return {
+        "news": news_list,
+        "fetched_at": datetime.now().astimezone().isoformat()
+
+    }
+
+
+# 🧠 FastAPI route with optional ?days=N query
 @app.get("/news")
 def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
     return scrape_news(days)
 
-# Run manually in script for testing outside API
+
+# 🧪 Local testing support
 if __name__ == "__main__":
-    print("Scraping Gulfshore Business - Commercial Real Estate News...\n")
-    result = scrape_news(days=7)
+    print("Scraping Gulfshore Business (All Sources)...\n")
+    result = scrape_news(days=0)
     print(result)
