@@ -1,0 +1,60 @@
+[33mcommit 8d30061f721a03cc87b23a948fc71f4d87e5367c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Wed Mar 26 15:45:31 2025 -0400
+
+    Restructure project for hybrid API with modular scrapers (Gulfshore + Naples)
+
+[33mcommit acbfe481f155d6b83891968953921b80312484f0[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Tue Mar 25 15:24:17 2025 -0400
+
+    Add Residential and Home page. Add sponsored content filter
+
+[33mcommit 03c43ecd31f3fc299805e3ab188b3aa154266678[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Tue Mar 25 14:09:56 2025 -0400
+
+    Update scraper to include 'Development Page' of GS business
+
+[33mcommit 7660ef3b65d79af4d02f46a17beb14b1d812a169[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Fri Mar 21 14:07:33 2025 -0400
+
+    Add filtering by days to news endpoint
+
+[33mcommit 12933d0790b44094cf2af7e2fd2fba6ee9f48a9b[m
+Merge: bcb6745 075130c
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Fri Mar 21 11:21:39 2025 -0400
+
+    Resolved merge conflict in main.py
+
+[33mcommit bcb6745738e5e795ea2e5ee4a066d316fc33a376[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Fri Mar 21 11:15:17 2025 -0400
+
+    Updated scraper, removed old script, and added OpenAPI spec
+
+[33mcommit 202bb268e44a71856b3b28668daa67985e55b90c[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Fri Mar 21 11:11:19 2025 -0400
+
+    Updated scraper to include dates
+
+[33mcommit 075130c526014b4cd15bd81d944e5d5b8eedd3da[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Thu Mar 20 15:17:45 2025 -0400
+
+    Update main.py
+
+[33mcommit 586770a0059f79b37162d3dafbcbb295fd98330d[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Thu Mar 20 14:51:50 2025 -0400
+
+    Rename cre_news_scraper0.py to main.py
+
+[33mcommit c8b4112d79657b4e6988ea45a915f1b8fd48de10[m
+Author: XelacCre <calexhensley8@gmail.com>
+Date:   Thu Mar 20 14:36:00 2025 -0400
+
+    first commit

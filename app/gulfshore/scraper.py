@@ -141,5 +141,4 @@ if __name__ == "__main__":
     result = scrape_news(days=0)
     print(result)
 
-# Export this router so main.py can use it
-__all__ = ["router"]    
+  

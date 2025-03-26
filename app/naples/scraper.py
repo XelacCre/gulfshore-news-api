@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 import re
 
-app = APIRouter()
+router = APIRouter()
 
 # 🔗 Only Naples Daily News – Business
 NEWS_SOURCES = [
@@ -135,5 +135,3 @@ if __name__ == "__main__":
     result = scrape_news(days=0)
     print(result)
 
-# Export this router so main.py can use it
-__all__ = ["router"]
