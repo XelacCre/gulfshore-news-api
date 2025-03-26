@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Query
+from fastapi import APIRouter, Query
 import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta 
 import re
 
-app = FastAPI()
+router = APIRouter()
 
 #  Config: Multi-source support
 NEWS_SOURCES = [
@@ -130,7 +130,7 @@ def scrape_news(days: int = 0):
 
 
 #  FastAPI route with optional ?days=N query
-@app.get("/news")
+@router.get("/news")
 def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
     return scrape_news(days)
 
@@ -140,3 +140,6 @@ if __name__ == "__main__":
     print("Scraping Gulfshore Business (All Sources)...\n")
     result = scrape_news(days=0)
     print(result)
+
+# Export this router so main.py can use it
+__all__ = ["router"]    
