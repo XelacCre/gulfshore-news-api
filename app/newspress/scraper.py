@@ -23,6 +23,10 @@ NEWS_SOURCES = [
         "name": "News-Press – Cape Coral",
         "url": "https://www.news-press.com/news/cape-coral/",
         "selector": "a.gnt_m_flm_a"
+    },
+    {   "name": "News-Press - Politics",
+        "url": "https://www.news-press.com/news/electionpolitics/",
+        "selector": "a.gnt_m_flm_a"
     }
 ]
 
