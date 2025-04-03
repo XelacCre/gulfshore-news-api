@@ -18,6 +18,10 @@ NEWS_SOURCES = [
         "name": "Naples Daily News – News",
         "url": "https://www.naplesnews.com/news/",
         "selector": "a.gnt_m_flm_a"
+    },
+    {   "name": "Naples Daily News - State",
+        "url": "https://www.naplesnews.com/news/state/",
+        "selector": "a.gnt_m_flm_a"
     }
 ]
 
