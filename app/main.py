@@ -3,7 +3,7 @@ from app.gulfshore.scraper import router as gulfshore_router
 from app.naples.scraper import router as naples_router
 from app.newspress.scraper import router as newspress_router
 from app.jacksonville.scraper import router as jax_router
-from app.heraldtribune.scraper import router herald_router
+from app.heraldtribune.scraper import router as herald_router
 
 app = FastAPI(title="News Scraper API")
 
