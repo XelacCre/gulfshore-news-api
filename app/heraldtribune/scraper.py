@@ -163,6 +163,7 @@ def scrape_news(days: int = 0):
 # 🧠 API route
 @router.get("/news")
 def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
+    print(f"🔔 Herald Tribune endpoint called with days={days}")
     return scrape_news(days)
 
 # 🧪 Local test
