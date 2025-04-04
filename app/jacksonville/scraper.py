@@ -17,6 +17,10 @@ NEWS_SOURCES = [
     {   "name": "Jacksonville Daily Record - Government",
         "url": "https://www.jaxdailyrecord.com/news/government",
         "selector": "div.card__post__title > h6 > a"
+    },
+    {   "name": "Jacksonville Daily Record - Development",
+        "url": "https://www.jaxdailyrecord.com/news/development",
+        "selector": "div.card__post__title > h6 > a"
     }
 ]
 
