@@ -16,11 +16,20 @@ NEWS_SOURCES = [
     },
     {   "name": "Jacksonville Daily Record - Government",
         "url": "https://www.jaxdailyrecord.com/news/government",
-        "selector": "div.card__post__title > h6 > a"
+        "selector": [
+
+            "div.card__post__title > h6 > a",
+            "div.card__post__title > h5 > a"
+        ]
     },
     {   "name": "Jacksonville Daily Record - Development",
         "url": "https://www.jaxdailyrecord.com/news/development",
-        "selector": "div.card__post__title > h6 > a"
+        "selector": [
+            
+            "div.card__post__title > h6 > a",
+            "div.card__post__title > h5 > a"
+        ]
+
     }
 ]
 
@@ -61,7 +70,13 @@ def scrape_news(days: int = 0):
             continue
 
         soup = BeautifulSoup(resp.text, "html.parser")
-        articles = soup.select(source["selector"])
+        selectors = source["selector"]
+        if isinstance(selectors,str):
+            articles = soup.select(selectors)
+        else:
+            articles = []
+            for sel in selectors:
+                articles.extend(soup.select(sel))
 
         if not articles:
             print(f"⚠️ No articles found for {source['name']}")
