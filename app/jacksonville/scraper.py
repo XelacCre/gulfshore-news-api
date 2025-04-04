@@ -99,7 +99,7 @@ def scrape_news(days: int = 0):
         "fetched_at": datetime.now().astimezone().isoformat()
     }
 
-@router.get("/jacksonville/news")
+@router.get("/news")
 def get_jax_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
     return scrape_news(days)
 
