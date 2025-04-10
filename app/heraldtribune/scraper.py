@@ -147,7 +147,8 @@ def scrape_news(days: int = 0):
                     "source": source["name"],
                     "title": headline,
                     "url": link,
-                    "date": pub_date
+                    "date": pub_date,
+                    "sponsored": False
                 }
 
                 print(f"[{pub_date}] {headline}")
