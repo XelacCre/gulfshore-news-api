@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from functools import lru_cache
 import re
 
 router = APIRouter()
@@ -118,6 +119,8 @@ def scrape_news(days: int = 0):
         for sel in selectors:
             articles.extend(soup.select(sel))
 
+        articles = articles[:10]
+
         if not articles:
             print(f"⚠️ No articles found for {source['name']}")
             continue
@@ -161,11 +164,15 @@ def scrape_news(days: int = 0):
         "fetched_at": datetime.now().astimezone().isoformat()
     }
 
+@lru_cache(maxsize=1)
+def cached_scrape_news(days: int=0):
+    return scrape_news(days)
+
 # 🧠 API route
 @router.get("/news")
 def get_news(days: int = Query(0, description="Limit results to articles published in the last N days")):
     print(f"🔔 Herald Tribune endpoint called with days={days}")
-    return scrape_news(days)
+    return cached_scrape_news(days)
 
 # 🧪 Local test
 if __name__ == "__main__":
